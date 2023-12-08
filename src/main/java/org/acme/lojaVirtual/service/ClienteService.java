@@ -3,13 +3,17 @@ package org.acme.lojaVirtual.service;
 import com.github.javafaker.Faker;
 import org.acme.lojaVirtual.exception.ResourceNotFoundException;
 import org.acme.lojaVirtual.model.Cliente;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class ClienteService {
+    Logger logger = LoggerFactory.getLogger(Cliente.class);
     private Map<Long, Cliente> clientes = initClientes();
+    private Long lastId =200L;
 
     private Map<Long, Cliente> initClientes() {
         Map<Long, Cliente> clientes = new HashMap<Long, Cliente>();
@@ -68,4 +72,47 @@ public class ClienteService {
     public List<Cliente> getAll(Integer size, int page, String sort, String order) {
         return null;
     }
+    public Long getLastId(){
+        return this.lastId;
+    }
+    public Long incrementId(){
+        this.lastId++;
+        return lastId;
+    }
+    public Cliente create(Cliente cliente){
+        Long id = incrementId();
+        cliente.setId(id);
+        clientes.put(id, cliente);
+        return cliente;
+    }
+    public long count(){
+        return clientes.size();
+    }
+    public int getTotalDePaginas(int size, int totalRegistros){
+        //int totalSize = (int) count();
+        int totalSize = totalRegistros;
+        double totalDePaginas =  (double)totalSize / (double)size;
+        return (int) Math.ceil(totalDePaginas);
+    }
+    public int getTotalDePaginas(int size){
+        double totalSize = (double) count();
+
+    double totalDePaginas =  totalSize / (double)size;
+        return (int) Math.ceil(totalDePaginas);
+    }
+    public List<Cliente> getByPageAndSize(int page, int size){
+        int totalDePaginas = getTotalDePaginas(size);
+        List<Cliente> all = getAll();
+        long count =  count();
+        int start = (page -1) * size;
+        int end = page * (size);
+        return all.subList(start,end);
+        //pra pageSize = 50
+        //0-49
+        //50,99
+        //100-149
+    }
+
+
+
 }

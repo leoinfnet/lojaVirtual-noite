@@ -6,6 +6,7 @@ import org.acme.lojaVirtual.model.payload.ClientePayload;
 import org.acme.lojaVirtual.model.payload.Info;
 import org.acme.lojaVirtual.model.payload.ResponsePayload;
 import org.acme.lojaVirtual.service.ClienteService;
+import org.acme.lojaVirtual.utils.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ public class ClienteController {
     Logger logger = LoggerFactory.getLogger(ClienteController.class);
     @Autowired
     ClienteService clienteService;
+    @Autowired
+    HttpUtils httpUtils;
     @GetMapping
     public ResponseEntity getAll(@RequestParam(required = false, defaultValue = "100") Integer size,
                                                 @RequestParam(required = false, defaultValue = "") String sort,
@@ -32,18 +35,24 @@ public class ClienteController {
 
 
                                 ){
-        List<Cliente> all = clienteService.getAll(start, end);
+
+
+
+        List<Cliente> all = clienteService.getByPageAndSize(page,size);
+        int x = 1;
+
+        int totalDePaginas = 3;
         Info info = new Info(200, 4, 1);
         ClientePayload clientePayload = new ClientePayload(all, info);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("total-size", "200");
-        httpHeaders.set("total-paginas", "4");
-        httpHeaders.set("current-page", "1");
+        HttpHeaders httpHeaders = httpUtils.getHttpHeaders(size, page);
         return  ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(all);
 
 
         //return clienteService.getAll(size,page,sort,order);
     }
+
+
+
     @GetMapping("/{id}")
     public ResponseEntity getById(@PathVariable Long id){
         try{
@@ -64,7 +73,14 @@ public class ClienteController {
             ResponsePayload responsePayload = new ResponsePayload(ex.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responsePayload);
         }
+    }
+    @PostMapping
+    public ResponseEntity create(@RequestBody Cliente cliente){
+        HttpHeaders httpHeaders = new HttpHeaders();
+        Cliente returned = clienteService.create(cliente);
 
+        httpHeaders.set("cliente-id",String.valueOf(returned.getId()));
+        return ResponseEntity.status(HttpStatus.CREATED).headers(httpHeaders).build();
     }
 
 }

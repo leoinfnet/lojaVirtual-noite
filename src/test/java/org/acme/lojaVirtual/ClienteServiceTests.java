@@ -2,6 +2,7 @@ package org.acme.lojaVirtual;
 
 import org.acme.lojaVirtual.model.Cliente;
 import org.acme.lojaVirtual.service.ClienteService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,5 +41,13 @@ public class ClienteServiceTests {
         Cliente clienteExistente = optionalExistente.get();
         assertEquals(1L,clienteExistente.getId() );
 
+    }
+    @Test
+    @DisplayName("Deve testar o total de paginas")
+    public void quantidadeDePaginas(){
+        int totalDePaginas = clienteService.getTotalDePaginas(4, 20);
+        assertEquals(5,totalDePaginas);
+        totalDePaginas = clienteService.getTotalDePaginas(4, 21);
+        assertEquals(6,totalDePaginas);
     }
 }
